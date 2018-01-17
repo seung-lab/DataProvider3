@@ -21,7 +21,7 @@ class Box(object):
     A 3D box identified by two vectors.
 
     set_coords       -- reset box coordinates
-    contains         -- is a point inside?
+    contains         -- is a point or a box inside?
     overlaps         -- does a box overlap?
     intersect        -- intersection between two boxes, if exist
     merge            -- merge two boxes

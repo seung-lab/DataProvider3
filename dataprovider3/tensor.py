@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __doc__ = """
 
-Read-only/writable TensorData classes.
+Read-only TensorData classes.
 
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
@@ -21,13 +21,13 @@ class TensorData(object):
 
     The 1st dimension is regarded as channels, and arbitrary access
     in this dimension is not allowed. Threfore, every data access should be
-    made through a 3D vector, not 4D.
+    made through a 3-tuple, not 4-tuple.
 
     Attributes:
-        _data:   4D numpy array. (channel, z, y, x)
-        _dim:    Dimension of each channel.
-        _offset: Coordinate offset from the origin.
-        _bbox:   Bounding box.
+        _data (ndarray): 4D numpy array. (channel, z, y, x)
+        _dim (Vec3d):    Dimension of each channel.
+        _offset (Vec3d): Coordinate offset from the origin.
+        _bbox (Box):     Bounding box.
     """
 
     def __init__(self, data, offset=(0,0,0)):
@@ -35,7 +35,7 @@ class TensorData(object):
         self._data   = utils.check_tensor(data)
         self._dim    = Vec3d(self._data.shape[-3:])
         self._offset = Vec3d(offset)
-        # Set bounding box.
+        # Set a bounding box.
         self._bbox = Box((0,0,0), self._dim)
         self._bbox.translate(self._offset)
 
@@ -76,7 +76,7 @@ class TensorData(object):
         return self._data.shape
 
     def dim(self):
-        """Return channel shape (z,y,x)."""
+        """Return data dim (z,y,x)."""
         return Vec3d(self._dim)
 
     def offset(self):
@@ -91,7 +91,7 @@ class TensorData(object):
 
     def __str__( self ):
         return "<TensorData>\nshape: %s\ndim: %s\noffset: %s\n" % \
-               (self.shape(), self._dim, self._offset)
+               (self.shape(), self.dim(), self.offset())
 
 
 ########################################################################
@@ -116,7 +116,7 @@ if __name__ == "__main__":
             self.assertTrue(bb==Box((1,1,1),(5,5,5)))
 
         def testGetPatch(self):
-            # (4,4,4) random 3D araray
+            # (4,4,4) random 3D araray.
             data = np.random.rand(4,4,4)
             dim = (3,3,3)
             T = TensorData(data)

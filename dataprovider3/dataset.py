@@ -9,6 +9,7 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 from collections import OrderedDict
 import copy
 import numpy as np
+import random
 
 from .geometry.box import Box
 from .geometry.vector import Vec3d
@@ -25,13 +26,16 @@ class VolumetricDataset(object):
                 4D volumetric data. (e.g. EM image stack, segmentation, etc.)
     """
 
-    def __init__(self, **kwargs):
-        # Initialize attributes.
-        self._reset()
+    def __init__(self, sample_spec):
+        """
+        Args:
+            sample_spec (dict): default sample spec.
+        """
+        self._spec = sample_spec
+        self._data = dict()
 
     def add_data(self, key, data, offset=(0,0,0)):
-        """
-        Add a volumetric data to dataset.
+        """Add a volumetric data to dataset.
 
         Args:
             key (string): data tag.
@@ -40,20 +44,31 @@ class VolumetricDataset(object):
         """
         self._data[key] = TensorData(data, offset=offset)
 
-    def get_sample(self, pos, spec):
+    def get_sample(self, pos, spec=None):
         """Extract a sample centered on pos."""
+        if spec is None:
+            spec = self._spec
+
         sample = dict()
         for key, dim in spec.items():
-            assert key in self._data
-            patch = self._data[key].get_patch(pos, dim[-3:])
+            patch = self.get_patch(key, pos, dim[-3:])
             if patch is None:
                 raise
             else:
                 sample[key] = patch
+
         return OrderedDict(sorted(sample.items(), key=lambda x: x[0]))
 
-    def random_sample(self, spec):
+    def get_patch(self, key, pos, dim):
+        """Extract a patch from the data tagged with `key`."""
+        assert key in self._data
+        assert len(pos)==3 and len(dim)==3
+        return self._data[key].get_patch(pos, dim)
+
+    def random_sample(self, spec=None):
         """Extract a random sample."""
+        if spec is None:
+            spec = self._spec
         try:
             # Pick a random sample.
             pos = self._random_location(spec)
@@ -62,33 +77,31 @@ class VolumetricDataset(object):
             raise
         return ret
 
-    ####################################################################
-    ## Getters and setters.
-    ####################################################################
+    def num_samples(self, spec=None):
+        if spec is None:
+            spec = self._spec
+        valid = self._valid_range(spec)
+        return np.prod(valid.size())
 
-    def num_sample(self, spec):
-        raise NotImplementedError
 
     ####################################################################
     ## Private Helper Methods.
     ####################################################################
 
-    def _reset(self):
-        """Reset all attributes."""
-        self._data = dict()
-
     def _random_location(self, spec):
         """Return one of the valid locations randomly."""
         valid = self._valid_range(spec)  # Valid range.
-        fails = 0
         s = valid.size()
-        z = np.random.randint(0, s[0])
-        y = np.random.randint(0, s[1])
-        x = np.random.randint(0, s[2])
+        # z = np.random.randint(0, s[0])
+        # y = np.random.randint(0, s[1])
+        # x = np.random.randint(0, s[2])
+        z = random.randint(0, s[0]-1)
+        y = random.randint(0, s[1]-1)
+        x = random.randint(0, s[2]-1)
         # Global coordinate system.
-        loc =  Vec3d(z,y,x) + valid.min()
+        loc = Vec3d(z,y,x) + valid.min()
         # DEBUG(kisuk)
-        # print("loc = {}, fails = {}".format(loc, fails))
+        # print("loc = {}".format(loc))
         return loc
 
     def _valid_range(self, spec):
