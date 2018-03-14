@@ -19,10 +19,9 @@ class Vec3d(object):
     and also provides a bunch of high level functions.
     reproduced from the vec2d class on the pygame wiki site.
     """
-
     __slots__ = ['x', 'y', 'z']
 
-    def __init__(self, x_or_triple, y = None, z = None):
+    def __init__(self, x_or_triple, y=None, z=None):
         if y == None:
             self.x = x_or_triple[0]
             self.y = x_or_triple[1]
@@ -396,7 +395,7 @@ if __name__ == "__main__":
             if sys.version_info[0] == 2:
                 self.assertTrue(v / 2 == Vec3d(55, 111, 166))
             else:
-                self.assertTrue(v / 2 == Vec3d(55.5, 111, 166.5))            
+                self.assertTrue(v / 2 == Vec3d(55.5, 111, 166.5))
             self.assertTrue(v // 2 == (55, 111, 166))
             self.assertTrue(v ** Vec3d(2,3,2) == [12321, 10941048, 110889])
             self.assertTrue(v + [-11, 78, 67] == Vec3d(100, 300, 400))

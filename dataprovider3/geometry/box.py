@@ -30,7 +30,6 @@ class Box(object):
     expand_by        -- in-place grow (or shrink)
     expanded_by      -- grow (or shrink)
     """
-
     def __init__(self, v1_or_box, v2=None):
         """Initialize a box from another box or two vectors."""
         if v2 == None:

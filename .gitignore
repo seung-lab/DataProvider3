@@ -1,1 +1,8 @@
-*.pyc
+build/
+dist/
+test/
+dataprovider.egg-info/
+*/**/__pycache__
+*/**/*.pyc
+*/**/*~
+*~

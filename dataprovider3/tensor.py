@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-__doc__ = """
-
-Read-only TensorData classes.
-
-Kisuk Lee <kisuklee@mit.edu>, 2017
-"""
-
 import math
 import numpy as np
 import time
@@ -16,12 +8,15 @@ from . import utils
 
 
 class TensorData(object):
-    """
-    Read-only tensor data.
+    """Read-only tensor data.
 
     The 1st dimension is regarded as channels, and arbitrary access
     in this dimension is not allowed. Threfore, every data access should be
     made through a 3-tuple, not 4-tuple.
+
+    Args:
+        data (ndarray): volumetric data of size (z,y,x) or (c,z,y,x).
+        offset (3-tuple of int, optional): offset from the origin.
 
     Attributes:
         _data (ndarray): 4D numpy array. (channel, z, y, x)
@@ -29,10 +24,8 @@ class TensorData(object):
         _offset (Vec3d): Coordinate offset from the origin.
         _bbox (Box):     Bounding box.
     """
-
     def __init__(self, data, offset=(0,0,0)):
-        """Initialize a TensorData object."""
-        self._data   = utils.check_tensor(data)
+        self._data   = utils.to_tensor(data)
         self._dim    = Vec3d(self._data.shape[-3:])
         self._offset = Vec3d(offset)
         # Set a bounding box.
@@ -40,7 +33,9 @@ class TensorData(object):
         self._bbox.translate(self._offset)
 
     def get_patch(self, pos, dim):
-        """Extract a patch of size `dim` centered on `pos`."""
+        """
+        Extract a patch of size `dim` centered on `pos`.
+        """
         assert len(pos)==3 and len(dim)==3
         patch = None
         # Is the patch contained within the bounding box?
@@ -49,13 +44,15 @@ class TensorData(object):
             box.translate(-self._offset)  # Local coordinate system.
             vmin  = box.min()
             vmax  = box.max()
-            patch = np.copy(self._data[:,vmin[0]:vmax[0],
-                                         vmin[1]:vmax[1],
-                                         vmin[2]:vmax[2]])
+            patch = np.copy(self._data[...,vmin[0]:vmax[0],
+                                           vmin[1]:vmax[1],
+                                           vmin[2]:vmax[2]])
         return patch
 
     def valid_range(self, dim):
-        """Get a valid range for extracting patches of size `dim`."""
+        """
+        Get a valid range for extracting patches of size `dim`.
+        """
         assert len(dim)==3
         dim  = Vec3d(dim)
         top  = dim // 2             # Top margin.
