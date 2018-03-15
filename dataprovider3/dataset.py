@@ -14,6 +14,11 @@ class OutOfRangeError(Exception):
         super(OutOfRangeError, self).__init__()
 
 
+class NoSpecError(Exception):
+    def __init__(self):
+        super(NoSpecError, self).__init__()
+
+
 class Dataset(object):
     """Dataset for volumetric data.
 
@@ -81,7 +86,7 @@ class Dataset(object):
     def _validate(self, spec):
         if spec is None:
             if self._spec is None:
-                raise
+                raise NoSpecError()
             spec = self._spec
         for k in spec:
             assert k in self._data

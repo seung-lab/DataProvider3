@@ -1,7 +1,6 @@
 build/
 dist/
-test/
-dataprovider.egg-info/
+dataprovider3.egg-info/
 */**/__pycache__
 */**/*.pyc
 */**/*~
