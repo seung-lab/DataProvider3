@@ -70,8 +70,11 @@ class Dataset(object):
         try:
             pos = self._random_location(spec)
             ret = self.get_sample(pos, spec)
+        except OutOfRangeError:
+            print("out-of-range error")
+            raise
         except:
-            raise OutOfRangeError()
+            raise
         return ret
 
     def num_samples(self, spec=None):
@@ -96,7 +99,7 @@ class Dataset(object):
         """Return a random valid location."""
         valid = self._valid_range(spec)
         if self._locs is None:
-            s = valid.size()
+            s = tuple(valid.size())
             x = np.random.randint(0, s[-1])
             y = np.random.randint(0, s[-2])
             z = np.random.randint(0, s[-3])
