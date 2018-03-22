@@ -9,16 +9,6 @@ from .tensor import TensorData
 from . import utils
 
 
-class OutOfRangeError(Exception):
-    def __init__(self):
-        super(OutOfRangeError, self).__init__()
-
-
-class NoSpecError(Exception):
-    def __init__(self):
-        super(NoSpecError, self).__init__()
-
-
 class Dataset(object):
     """Dataset for volumetric data.
 
@@ -26,32 +16,34 @@ class Dataset(object):
         spec (dictionary): mapping key to tensor's shape.
 
     Attributes:
-        _data (dictionary): mapping key to TensorData.
+        spec (dictionary):
+        data (dictionary): mapping key to TensorData.
+        locs (dictionary):
     """
     def __init__(self, spec=None):
-        self._spec = spec
-        self._data = dict()
-        self._locs = None
+        self.spec = spec
+        self.data = dict()
+        self.locs = None
 
     def __call__(self, spec=None):
         return self.random_sample(spec=spec)
 
     def add_data(self, key, data, offset=(0,0,0)):
-        self._data[key] = TensorData(data, offset=offset)
+        self.data[key] = TensorData(data, offset=offset)
 
     def add_mask(self, key, data, offset=(0,0,0), loc=False):
         self.add_data(key, data, offset=offset)
         if loc:
-            self._locs = dict()
-            self._locs['data'] = np.flatnonzero(data)
-            self._locs['dims'] = data.shape
-            self._locs['offset'] = Vec3d(offset)
+            self.locs = dict()
+            self.locs['data'] = np.flatnonzero(data)
+            self.locs['dims'] = data.shape
+            self.locs['offset'] = Vec3d(offset)
 
     def get_patch(self, key, pos, dim):
         """Extract a patch from the data tagged with `key`."""
-        assert key in self._data
+        assert key in self.data
         assert len(pos)==3 and len(dim)==3
-        return self._data[key].get_patch(pos, dim)
+        return self.data[key].get_patch(pos, dim)
 
     def get_sample(self, pos, spec=None):
         """Extract a sample centered on pos."""
@@ -60,7 +52,7 @@ class Dataset(object):
         for key, dim in spec.items():
             patch = self.get_patch(key, pos, dim[-3:])
             if patch is None:
-                raise OutOfRangeError()
+                raise Dataset.OutOfRangeError()
             sample[key] = patch
         return utils.sort(sample)
 
@@ -70,7 +62,7 @@ class Dataset(object):
         try:
             pos = self._random_location(spec)
             ret = self.get_sample(pos, spec)
-        except OutOfRangeError:
+        except Dataset.OutOfRangeError:
             print("out-of-range error")
             raise
         except:
@@ -88,17 +80,17 @@ class Dataset(object):
 
     def _validate(self, spec):
         if spec is None:
-            if self._spec is None:
-                raise NoSpecError()
-            spec = self._spec
+            if self.spec is None:
+                raise Dataset.NoSpecError()
+            spec = self.spec
         for k in spec:
-            assert k in self._data
+            assert k in self.data
         return spec
 
     def _random_location(self, spec):
         """Return a random valid location."""
         valid = self._valid_range(spec)
-        if self._locs is None:
+        if self.locs is None:
             s = tuple(valid.size())
             x = np.random.randint(0, s[-1])
             y = np.random.randint(0, s[-2])
@@ -107,10 +99,10 @@ class Dataset(object):
             loc = Vec3d(z,y,x) + valid.min()
         else:
             while True:
-                idx = np.random.choice(self._locs['data'], 1)
-                loc = np.unravel_index(idx[0], self._locs['dims'])
+                idx = np.random.choice(self.locs['data'], 1)
+                loc = np.unravel_index(idx[0], self.locs['dims'])
                 # Global coordinate system.
-                loc = Vec3d(loc[-3:]) + self._locs['offset']
+                loc = Vec3d(loc[-3:]) + self.locs['offset']
                 if valid.contains(loc):
                     break
         # DEBUG(kisuk):
@@ -123,7 +115,18 @@ class Dataset(object):
         """
         valid = None
         for key, dim in spec.items():
-            assert key in self._data
-            v = self._data[key].valid_range(dim[-3:])
+            assert key in self.data
+            v = self.data[key].valid_range(dim[-3:])
             valid = v if valid is None else valid.intersect(v)
+        assert valid is not None
         return valid
+
+    ####################################################################
+    ## Exceptions.
+    ####################################################################
+
+    class OutOfRangeError(Exception):
+        pass
+
+    class NoSpecError(Exception):
+        pass

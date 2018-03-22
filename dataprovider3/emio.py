@@ -10,7 +10,6 @@ def imread(fname):
             data = np.asarray(f['/main'])
     else:
         raise RuntimeError("only hdf5 format is supported")
-
     return data
 
 
