@@ -1,10 +1,8 @@
 from collections import OrderedDict
 import copy
 import numpy as np
-import random
 
-from .geometry.box import Box
-from .geometry.vector import Vec3d
+from .geometry import Box, Vec3d
 from .tensor import TensorData
 from . import utils
 
@@ -13,14 +11,15 @@ class Dataset(object):
     """Dataset for volumetric data.
 
     Args:
-        spec (dictionary): mapping key to tensor's shape.
+        spec (dict): mapping key to tensor's shape.
 
     Attributes:
-        spec (dictionary):
-        data (dictionary): mapping key to TensorData.
-        locs (dictionary):
+        spec (dict): mapping key to tensor's shape.
+        data (dict): mapping key to TensorData.
+        locs (dict): valid locations.
     """
     def __init__(self, spec=None):
+        # If `spec` is not provided, it must be provided dynamically.
         self.spec = spec
         self.data = dict()
         self.locs = None
@@ -82,9 +81,8 @@ class Dataset(object):
         if spec is None:
             if self.spec is None:
                 raise Dataset.NoSpecError()
-            spec = self.spec
-        for k in spec:
-            assert k in self.data
+            spec = dict(self.spec)
+        assert all([k in self.data for k in spec])
         return spec
 
     def _random_location(self, spec):
@@ -105,7 +103,7 @@ class Dataset(object):
                 loc = Vec3d(loc[-3:]) + self.locs['offset']
                 if valid.contains(loc):
                     break
-        # DEBUG(kisuk):
+        # DEBUG:
         # print('loc = {}'.format(loc))
         return loc
 

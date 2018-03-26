@@ -13,7 +13,10 @@ Kisuk Lee <kisuklee@mit.edu>, 2017
 
 import math
 
-from .vector import Vec3d, minimum, maximum
+from .vector import *
+
+
+__all__ = ['Box', 'centered_box']
 
 
 class Box(object):

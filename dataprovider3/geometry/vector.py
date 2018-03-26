@@ -8,9 +8,11 @@ http://pygame.org/wiki/3DVectorClass
 
 Kisuk Lee <kisuklee@mit.edu>, 2017
 """
-
 import math
 import operator
+
+
+__all__ = ['Vec3d', 'minimum', 'maximum']
 
 
 class Vec3d(object):

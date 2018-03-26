@@ -2,8 +2,7 @@ import math
 import numpy as np
 import time
 
-from .geometry.box import Box, centered_box
-from .geometry.vector import Vec3d
+from .geometry import Box, Vec3d, centered_box
 from . import utils
 
 
