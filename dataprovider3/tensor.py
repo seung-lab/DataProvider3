@@ -73,7 +73,7 @@ class TensorData(object):
 
     def dim(self):
         """Return data dim (z,y,x)."""
-        return Vec3d(self._dim)
+        return tuple(self._dim)
 
     def offset(self):
         return Vec3d(self._offset)

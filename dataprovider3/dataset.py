@@ -69,9 +69,18 @@ class Dataset(object):
         return ret
 
     def num_samples(self, spec=None):
-        spec = self._validate(spec)
-        valid = self._valid_range(spec)
-        return np.prod(valid.size())
+        try:
+            spec = self._validate(spec)
+            valid = self._valid_range(spec)
+            num = np.prod(valid.size())
+        except Dataset.NoSpecError:
+            nums = list()
+            for k, v in self.data.items():
+                nums.append(np.prod(v.dim()))
+            num = min(nums)
+        except:
+            raise
+        return num
 
     ####################################################################
     ## Private Helper Methods.
