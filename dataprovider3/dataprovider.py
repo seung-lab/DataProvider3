@@ -50,9 +50,11 @@ class DataProvider(object):
             try:
                 spec = dict(self.spec)
                 imgs = list(self.imgs)
-                if self.augments is not None:
+                if self.augments is None:
+                    sample = dset(spec=spec)
+                else:
                     spec = self.augments.prepare(spec, imgs=imgs)
-                sample = dset(spec=spec)
+                    sample = self.augments(dset(spec=spec))
                 break
             except Dataset.OutOfRangeError:
                 pass
