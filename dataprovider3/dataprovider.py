@@ -11,26 +11,22 @@ class DataProvider(object):
         augs (Augment): Augment.
         p (list of float): sampling weights.
     """
-    def __init__(self):
+    def __init__(self, spec):
+        self.spec = dict(spec)
         self.datasets = list()
         self.augments = None
         self.p = None
-        self.spec = None
 
     def add_dataset(self, dset):
         assert isinstance(dset, Dataset)
+        assert all([k in dset.data for k in self.spec])
         self.datasets.append(dset)
 
     def set_augment(self, aug):
         self.augments = aug
 
-    def set_spec(self, spec):
-        assert all([k in self.datasets for k in spec])
-        self.spec = dict(spec)
-
     def set_imgs(self, imgs):
         assert len(imgs) > 0
-        assert all([i in self.datasets for i in imgs])
         self.imgs = list(imgs)
 
     def set_sampling_weights(self, p=None):
