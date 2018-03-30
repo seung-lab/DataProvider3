@@ -10,17 +10,13 @@ from . import utils
 class Dataset(object):
     """Dataset for volumetric data.
 
-    Args:
-        spec (dict): mapping key to tensor's shape.
-
     Attributes:
         spec (dict): mapping key to tensor's shape.
         data (dict): mapping key to TensorData.
         locs (dict): valid locations.
     """
     def __init__(self, spec=None):
-        # If `spec` is not provided, it must be provided dynamically.
-        self.spec = spec
+        self.set_spec(spec)
         self.data = dict()
         self.locs = None
 
@@ -37,6 +33,11 @@ class Dataset(object):
             self.locs['data'] = np.flatnonzero(data)
             self.locs['dims'] = data.shape
             self.locs['offset'] = Vec3d(offset)
+
+    def set_spec(self, spec):
+        self.spec = None
+        if spec is not None:
+            self.spec = dict(spec)
 
     def get_patch(self, key, pos, dim):
         """Extract a patch from the data tagged with `key`."""

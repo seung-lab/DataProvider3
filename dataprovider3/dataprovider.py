@@ -7,6 +7,7 @@ class DataProvider(object):
     """DataProvider.
 
     Args:
+        spec (dict):
         dsets (list of Dataset): Datasets.
         augs (Augment): Augment.
         p (list of float): sampling weights.
