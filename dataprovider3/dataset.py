@@ -125,6 +125,8 @@ class Dataset(object):
         for key, dim in spec.items():
             assert key in self.data
             v = self.data[key].valid_range(dim[-3:])
+            if v is None:
+                raise Dataset.OutOfRangeError()
             valid = v if valid is None else valid.intersect(v)
         assert valid is not None
         return valid

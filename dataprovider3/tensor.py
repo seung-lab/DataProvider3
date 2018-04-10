@@ -53,6 +53,8 @@ class TensorData(object):
         Get a valid range for extracting patches of size `dim`.
         """
         assert len(dim)==3
+        if any([dim[i] > self._dim[i] for i in range(3)]):
+            return None            
         dim  = Vec3d(dim)
         top  = dim // 2             # Top margin.
         btm  = dim - top - (1,1,1)  # Bottom margin.
