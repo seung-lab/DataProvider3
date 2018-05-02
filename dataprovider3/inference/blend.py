@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-from .. import geometry
+from ..geometry import *
 from ..tensor import WritableTensorData as WTD
 from ..tensor import WritableTensorDataWithMask as WTDM
 
@@ -36,10 +36,10 @@ class Blend(object):
         return self.data[key].data()
 
     def voxels(self):
-        voxels = [0]
+        voxels = list()
         for k, v in self.data.items():
             voxels.append(np.prod(v.dim()))
-        return min(voxels)
+        return min(voxels) if len(voxels) > 0 else 0
 
     ####################################################################
     ## Private Methods.
@@ -93,7 +93,7 @@ class BumpBlend(Blend):
         for k, v in sample.items():
             assert(k in self.data)
             t0 = time.time()
-            mask = self._get_mask(k, loc)
+            mask = self._get_mask(k, loc, v.shape[-3:])
             t1 = time.time()
             self.data[k].set_patch(loc, v, op=self.op, mask=mask)
             t2 = time.time()
@@ -103,11 +103,11 @@ class BumpBlend(Blend):
     ## Private methods.
     ####################################################################
 
-    def _get_mask(self, key, loc):
+    def _get_mask(self, key, loc, dim):
         mask = None
         if self.blend:
             assert(key in self.max_logits)
-            max_logit = self.max_logits[key].get_patch(loc)
+            max_logit = self.max_logits[key].get_patch(loc, dim)
             mask = self._bump_map(max_logit.shape[-3:], max_logit[0,...])
         return mask
 

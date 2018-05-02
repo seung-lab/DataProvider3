@@ -13,7 +13,8 @@ setup(
     license='MIT',
     # requires=['cython'],
     packages=['dataprovider3',
-              'dataprovider3.geometry'],
+              'dataprovider3.geometry',
+              'dataprovider3.inference'],
     include_package_data=True,
     zip_safe=False
 )

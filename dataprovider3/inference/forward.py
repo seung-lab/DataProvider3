@@ -1,7 +1,8 @@
+import math
 import numpy as np
 
 from . import blend
-from .. import geometry
+from ..geometry import *
 
 
 class ForwardScanner(object):
@@ -96,7 +97,7 @@ class ForwardScanner(object):
         assert(cmin < cmax)
 
         # Dimension-specific params
-        stride = int(self.stride[dim])
+        stride = self.stride[dim]
         grid = int(self.grid[dim])
         coord = set()
 

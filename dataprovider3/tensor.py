@@ -124,16 +124,16 @@ class WritableTensorDataWithMask(WritableTensorData):
     Writable tensor data with blending mask.
     """
     def __init__(self, data, offset=(0,0,0)):
-        super(WritableTensorData, self).__init__(self, data, offset)
+        super(WritableTensorDataWithMask, self).__init__(data, offset)
         self._norm = WritableTensorData(self.dim(), offset)
         self.normalized = False
 
     def set_patch(self, pos, patch, op=np.add, mask=None):
         # Default mask
-        if mask:
-            mask = utils.to_volume(mask)
-        else:
+        if mask is None:
             mask = np.full(patch.shape[-3:], 1, dtype='float32')
+        else:
+            mask = utils.to_volume(mask)
         t0 = time.time()
         WritableTensorData.set_patch(self, pos, patch*mask, op=op)
         t1 = time.time()
@@ -141,17 +141,17 @@ class WritableTensorDataWithMask(WritableTensorData):
         t2 = time.time()
         # print("set_patch: %.3f, set_mask: %.3f" % (t1 - t0, t2 - t1))
 
-    def get_norm(self):
+    def norm(self):
         return self._norm._data
 
-    def get_data(self):
+    def data(self):
         if not self.normalized:
             np.divide(self._data, self._norm._data, out=self._data)
             self.normalized = True
         return self._data
 
-    def get_unnormalized_data(self):
-        return np.multiply(self.get_data(), self._norm._data)
+    def unnormalized_data(self):
+        return np.multiply(self.data(), self._norm._data)
 
 
 ########################################################################
