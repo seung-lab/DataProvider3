@@ -1,6 +1,7 @@
 build/
 dist/
 dataprovider3.egg-info/
+test/.ipynb_checkpoints
 */**/__pycache__
 */**/*.pyc
 */**/*~
