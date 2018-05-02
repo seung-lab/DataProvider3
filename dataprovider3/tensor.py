@@ -24,40 +24,38 @@ class TensorData(object):
         _bbox (Box):     Bounding box.
     """
     def __init__(self, data, offset=(0,0,0)):
-        self._data   = utils.to_tensor(data)
-        self._dim    = Vec3d(self._data.shape[-3:])
+        self._data = utils.to_tensor(data)
+        self._dim = Vec3d(self._data.shape[-3:])
         self._offset = Vec3d(offset)
+
         # Set a bounding box.
         self._bbox = Box((0,0,0), self._dim)
         self._bbox.translate(self._offset)
 
     def get_patch(self, pos, dim):
-        """
-        Extract a patch of size `dim` centered on `pos`.
-        """
-        assert len(pos)==3 and len(dim)==3
+        """Extract a patch of size `dim` centered on `pos`."""
+        assert(len(pos)==3 and len(dim)==3)
         patch = None
+
         # Is the patch contained within the bounding box?
         box = centered_box(pos, dim)
         if self._bbox.contains(box):
-            box.translate(-self._offset)  # Local coordinate system.
-            vmin  = box.min()
-            vmax  = box.max()
+            box.translate(-self._offset)  # Local coordinate system
+            vmin = box.min()
+            vmax = box.max()
             patch = np.copy(self._data[...,vmin[0]:vmax[0],
                                            vmin[1]:vmax[1],
                                            vmin[2]:vmax[2]])
         return patch
 
     def valid_range(self, dim):
-        """
-        Get a valid range for extracting patches of size `dim`.
-        """
-        assert len(dim)==3
+        """Get a valid range for extracting patches of size `dim`."""
+        assert(len(dim)==3)
         if any([dim[i] > self._dim[i] for i in range(3)]):
-            return None            
-        dim  = Vec3d(dim)
-        top  = dim // 2             # Top margin.
-        btm  = dim - top - (1,1,1)  # Bottom margin.
+            return None
+        dim = Vec3d(dim)
+        top = dim // 2             # Top margin
+        btm = dim - top - (1,1,1)  # Bottom margin
         vmin = self._offset + top
         vmax = self._offset + self._dim - btm
         return Box(vmin, vmax)
@@ -90,6 +88,70 @@ class TensorData(object):
     def __str__( self ):
         return "<TensorData>\nshape: %s\ndim: %s\noffset: %s\n" % \
                (self.shape(), self.dim(), self.offset())
+
+
+class WritableTensorData(TensorData):
+    """
+    Writable tensor data.
+    """
+    def __init__(self, data, offset=(0,0,0), fov=(0,0,0)):
+        if isinstance(data, np.ndarray):
+            super(WritableTensorData, self).__init__(data, offset)
+        else:
+            assert(len(data) >= 3)
+            data = np.full(data, 0, dtype='float32')
+            super(WritableTensorData, self).__init__(data, offset)
+
+    def set_patch(self, pos, patch, op=None):
+        assert(len(pos) == 3)
+        patch = utils.to_tensor(patch)
+        dim = patch.shape[-3:]
+        box = centered_box(pos, dim)
+        assert(self._bbox.contains(box))
+
+        box.translate(-self._offset)  # Local coordinate system
+        vmin = box.min()
+        vmax = box.max()
+        slices = [slice(None)] + [slice(vmin[i],vmax[i]) for i in range(3)]
+        if op:
+            self._data[slices] = op(self._data[slices], patch)
+        else:
+            self._data[slices] = patch
+
+
+class WritableTensorDataWithMask(WritableTensorData):
+    """
+    Writable tensor data with blending mask.
+    """
+    def __init__(self, data, offset=(0,0,0)):
+        super(WritableTensorData, self).__init__(self, data, offset)
+        self._norm = WritableTensorData(self.dim(), offset)
+        self.normalized = False
+
+    def set_patch(self, pos, patch, op=np.add, mask=None):
+        # Default mask
+        if mask:
+            mask = utils.to_volume(mask)
+        else:
+            mask = np.full(patch.shape[-3:], 1, dtype='float32')
+        t0 = time.time()
+        WritableTensorData.set_patch(self, pos, patch*mask, op=op)
+        t1 = time.time()
+        self._norm.set_patch(pos, mask, op=np.add)
+        t2 = time.time()
+        # print("set_patch: %.3f, set_mask: %.3f" % (t1 - t0, t2 - t1))
+
+    def get_norm(self):
+        return self._norm._data
+
+    def get_data(self):
+        if not self.normalized:
+            np.divide(self._data, self._norm._data, out=self._data)
+            self.normalized = True
+        return self._data
+
+    def get_unnormalized_data(self):
+        return np.multiply(self.get_data(), self._norm._data)
 
 
 ########################################################################

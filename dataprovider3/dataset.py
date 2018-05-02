@@ -83,6 +83,10 @@ class Dataset(object):
             raise
         return num
 
+    def valid_range(self, spec=None):
+        spec = self._validate(spec)
+        return self._valid_range(spec)
+
     ####################################################################
     ## Private Helper Methods.
     ####################################################################
