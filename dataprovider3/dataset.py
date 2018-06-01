@@ -15,13 +15,20 @@ class Dataset(object):
         data (dict): mapping key to TensorData.
         locs (dict): valid locations.
     """
-    def __init__(self, spec=None):
+    def __init__(self, spec=None, tag=''):
         self.set_spec(spec)
+        self.tag = tag
         self.data = dict()
         self.locs = None
 
     def __call__(self, spec=None):
         return self.random_sample(spec=spec)
+
+    def __repr__(self):
+        format_string = self.__class__.__name__ + '('
+        format_string += self.tag
+        format_string += ')'
+        return format_string
 
     def add_data(self, key, data, offset=(0,0,0)):
         self.data[key] = TensorData(data, offset=offset)
