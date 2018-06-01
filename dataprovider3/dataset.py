@@ -78,9 +78,12 @@ class Dataset(object):
 
     def num_samples(self, spec=None):
         try:
-            spec = self._validate(spec)
-            valid = self._valid_range(spec)
-            num = np.prod(valid.size())
+            if self.locs is None:
+                spec = self._validate(spec)
+                valid = self._valid_range(spec)
+                num = np.prod(valid.size())
+            else:
+                num = self.locs['data'].size
         except Dataset.NoSpecError:
             nums = list()
             for k, v in self.data.items():
