@@ -30,6 +30,10 @@ class DataProvider(object):
         assert len(imgs) > 0
         self.imgs = list(imgs)
 
+    def set_segs(self, segs):
+        assert len(segs) > 0
+        self.segs = list(segs)
+
     def set_sampling_weights(self, p=None):
         if p is None:
             p = [d.num_samples() for d in self.datasets]
@@ -51,10 +55,11 @@ class DataProvider(object):
             try:
                 spec = dict(self.spec)
                 imgs = list(self.imgs)
+                segs = list(self.segs)
                 if self.augments is None:
                     sample = dset(spec=spec)
                 else:
-                    spec = self.augments.prepare(spec, imgs=imgs)
+                    spec = self.augments.prepare(spec, imgs=imgs, segs=segs)
                     sample = self.augments(dset(spec=spec))
                 break
             except Dataset.OutOfRangeError:
