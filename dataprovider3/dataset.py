@@ -20,6 +20,7 @@ class Dataset(object):
         self.tag = tag
         self.data = dict()
         self.locs = None
+        self.allow_shifts = False
 
     def __call__(self, spec=None):
         return self.random_sample(spec=spec)
@@ -33,13 +34,14 @@ class Dataset(object):
     def add_data(self, key, data, offset=(0,0,0)):
         self.data[key] = TensorData(data, offset=offset)
 
-    def add_mask(self, key, data, offset=(0,0,0), loc=False):
+    def add_mask(self, key, data, offset=(0,0,0), loc=False, shifts=False):
         self.add_data(key, data, offset=offset)
         if loc:
             self.locs = dict()
             self.locs['data'] = np.flatnonzero(data)
             self.locs['dims'] = data.shape
             self.locs['offset'] = Vec3d(offset)
+            self.allow_shifts = shifts
 
     def set_spec(self, spec):
         self.spec = None
@@ -50,7 +52,7 @@ class Dataset(object):
         """Extract a patch from the data tagged with `key`."""
         assert key in self.data
         assert len(pos)==3 and len(dim)==3
-        return self.data[key].get_patch(pos, dim)
+        return self.data[key].get_patch(pos, dim, allow_shifts=self.allow_shifts)
 
     def get_sample(self, pos, spec=None):
         """Extract a sample centered on pos."""
@@ -125,7 +127,7 @@ class Dataset(object):
                 loc = np.unravel_index(idx[0], self.locs['dims'])
                 # Global coordinate system.
                 loc = Vec3d(loc[-3:]) + self.locs['offset']
-                if valid.contains(loc):
+                if valid.contains(loc) or self.allow_shifts:
                     break
         # DEBUG:
         # print('loc = {}'.format(loc))

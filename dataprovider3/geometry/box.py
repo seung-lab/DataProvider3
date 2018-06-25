@@ -16,7 +16,7 @@ import math
 from .vector import *
 
 
-__all__ = ['Box', 'centered_box']
+__all__ = ['Box', 'centered_box', 'containing_box']
 
 
 class Box(object):
@@ -140,6 +140,29 @@ def centered_box(c, s):
     v1 = center - half
     v2 = v1 + size
     return Box(v1,v2)
+
+
+def containing_box(p, s, vbox):
+    """Return a box of size s containing point p."""
+    # ill-posed problem if box size is larger than the volume
+    assert all(v >= 0 for v in vbox.size() - s)
+    box = centered_box(p, s)
+    return shift_to_bounds(box, vbox)
+
+
+def shift_to_bounds(box, vbox):
+    """
+    Shifts a coordinate box to reside within the volume box.
+    Assumes that box.size() <= vbox.size() in all dimensions
+    """
+    min_diff = box.min() - vbox.min()
+    max_diff = box.max() - vbox.max()
+
+    shift_up = (abs(min_diff) - min_diff) // 2
+    shift_down = (abs(max_diff) + max_diff) // -2
+
+    box.translate(shift_up + shift_down)
+    return box
 
 
 ########################################################################
