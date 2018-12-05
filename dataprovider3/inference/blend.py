@@ -7,12 +7,13 @@ from ..tensor import WritableTensorDataWithMask as WTDM
 
 
 def prepare_outputs(spec, locs, blend=False, blend_mode=''):
-    if blend_mode not in ['','bump']:
+    if blend_mode not in ['','bump','precomputed']:
         raise RuntimeError('unknown output blend type [%s]' % blend_mode)
     if blend_mode == 'bump':
         outputs = BumpBlend(spec, locs, blend=blend)
     else:
-        outputs = Blend(spec, locs, blend=blend)
+        precomputed = blend_mode == 'precomputed'
+        outputs = Blend(spec, locs, blend=blend, precomputed=precomputed)
     return outputs
 
 
@@ -20,10 +21,11 @@ class Blend(object):
     """
     Blend interface.
     """
-    def __init__(self, spec, locs, blend=False):
+    def __init__(self, spec, locs, blend=False, precomputed=False):
         self.spec = dict(spec)
         self.locs = list(locs)
         self.blend = blend
+        self.precomputed = precomputed
         self._prepare_data()
 
     def push(self, loc, sample):
@@ -61,7 +63,10 @@ class Blend(object):
 
             # Inference with overlapping windows
             if self.blend:
-                self.data[k] = WTDM(shape, c.min())
+                if self.precomputed:
+                    self.data[k] = WTD(shape, c.min())
+                else:
+                    self.data[k] = WTDM(shape, c.min())
                 self.op = np.add
             else:
                 self.data[k] = WTD(shape, c.min())
