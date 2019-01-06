@@ -31,7 +31,7 @@ class DataProvider(object):
         self.imgs = list(imgs)
 
     def set_segs(self, segs):
-        assert len(segs) > 0
+        assert len(segs) >= 0
         self.segs = list(segs)
 
     def set_sampling_weights(self, p=None):
