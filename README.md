@@ -1,2 +1,2 @@
 # DataProvider3
-DataProvider for Python3
+Deep learning platform-independent volumetric data provider for training 3D convolutional network.
