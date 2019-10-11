@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+__doc__ = """
+
+I/O for EM images.
+
+Adopted the code by Jingpeng Wu <jingpeng.wu@gmail.com>
+
+Kisuk Lee <kisuklee@mit.edu>, 2017
+"""
+
 import h5py
 import numpy as np
 import os
