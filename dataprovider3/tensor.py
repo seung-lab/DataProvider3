@@ -112,7 +112,7 @@ class WritableTensorData(TensorData):
         box.translate(-self._offset)  # Local coordinate system
         vmin = box.min()
         vmax = box.max()
-        slices = [slice(None)] + [slice(vmin[i],vmax[i]) for i in range(3)]
+        slices = tuple([slice(None)] + [slice(vmin[i],vmax[i]) for i in range(3)])
         if op:
             self._data[slices] = op(self._data[slices], patch)
         else:
