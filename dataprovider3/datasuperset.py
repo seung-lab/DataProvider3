@@ -10,6 +10,7 @@ class DataSuperset(Dataset):
     def __init__(self, tag=''):
         self.tag = tag
         self.datasets = list()
+        self.p = None
 
     def __call__(self, spec=None):
         return self.random_sample(spec=spec)
