@@ -48,3 +48,6 @@ class DataSuperset(Dataset):
             self.set_sampling_weights()
         idx = np.random.choice(len(self.datasets), size=1, p=self.p)
         return self.datasets[idx[0]]
+
+    def num_samples(self, spec=None):
+        return sum([dset.num_samples(spec=spec) for dset in self.datasets])
