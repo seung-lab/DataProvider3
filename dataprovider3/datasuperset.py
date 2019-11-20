@@ -7,8 +7,7 @@ class DataSuperset(Dataset):
     """
     Superset of datasets.
     """
-    def __init__(self, spec=None, tag=''):
-        self.set_spec(spec)
+    def __init__(self, tag=''):
         self.tag = tag
         self.datasets = list()
 
@@ -23,13 +22,7 @@ class DataSuperset(Dataset):
 
     def add_dataset(self, dset):
         assert isinstance(dset, Dataset)
-        assert all([k in dset.data for k in self.spec])
         self.datasets.append(dset)
-
-    def set_spec(self, spec):
-        self.spec = None
-        if spec is not None:
-            self.spec = dict(spec)
 
     def random_sample(self, spec=None):
         dset = self.random_dataset()
