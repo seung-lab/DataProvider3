@@ -20,6 +20,12 @@ class DataSuperset(Dataset):
         format_string += ')'
         return format_string
 
+    def sanity_check(self, spec):
+        sanity = True
+        for dset in self.datasets:
+            sanity &= dset.sanity_check(spec)
+        return sanity
+
     def add_dataset(self, dset):
         assert isinstance(dset, Dataset)
         self.datasets.append(dset)
