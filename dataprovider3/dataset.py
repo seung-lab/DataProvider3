@@ -30,6 +30,9 @@ class Dataset(object):
         format_string += ')'
         return format_string
 
+    def sanity_check(self, spec):
+        return all([k in self.data for k in spec])
+
     def add_data(self, key, data, offset=(0,0,0)):
         self.data[key] = TensorData(data, offset=offset)
 

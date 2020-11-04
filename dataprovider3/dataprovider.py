@@ -20,7 +20,7 @@ class DataProvider(object):
 
     def add_dataset(self, dset):
         assert isinstance(dset, Dataset)
-        assert all([k in dset.data for k in self.spec])
+        assert dset.sanity_check(self.spec)
         self.datasets.append(dset)
 
     def set_augment(self, aug):
