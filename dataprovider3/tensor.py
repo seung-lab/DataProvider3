@@ -2,7 +2,7 @@ import math
 import numpy as np
 import time
 
-from .geometry import Box, Vec3d, centered_box
+from .geometry import Box, Vec3d, centered_box, containing_box
 from . import utils
 
 
@@ -32,13 +32,20 @@ class TensorData(object):
         self._bbox = Box((0,0,0), self._dim)
         self._bbox.translate(self._offset)
 
-    def get_patch(self, pos, dim):
-        """Extract a patch of size `dim` centered on `pos`."""
+    def get_patch(self, pos, dim, allow_shifts=False):
+        """
+        Extract a patch of size `dim` centered on `pos`.
+        Patches may not be centered on `pos` if `allow_shifts`=True
+        """
         assert(len(pos)==3 and len(dim)==3)
         patch = None
 
         # Is the patch contained within the bounding box?
-        box = centered_box(pos, dim)
+        if allow_shifts:
+            box = containing_box(pos, dim, self._bbox)
+        else:
+            box = centered_box(pos, dim)
+
         if self._bbox.contains(box):
             box.translate(-self._offset)  # Local coordinate system
             vmin = box.min()

@@ -49,8 +49,8 @@ class DataProvider(object):
         idx = np.random.choice(len(self.datasets), size=1, p=self.p)
         return self.datasets[idx[0]]
 
-    def random_sample(self):
-        dset = self.random_dataset()
+    def random_sample(self, dset=None):
+        dset = self.random_dataset() if dset is None else dset
         while True:
             try:
                 spec = dict(self.spec)
